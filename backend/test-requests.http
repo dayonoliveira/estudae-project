@@ -1,0 +1,150 @@
+###
+# ESTUDAE - EXEMPLOS DE REQUISIÇÕES HTTP (B4)
+###
+
+@baseUrl = http://localhost:3000
+@token = seu_token_aqui
+
+### 1. Registrar usuário
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "João Silva",
+  "email": "joao.silva@example.com",
+  "password": "senha123",
+  "birthdate": "2000-05-15",
+  "phone": "85988887777",
+  "profileType": "STUDENT",
+  "bio": "Estudante universitário",
+  "address": "Fortaleza, CE"
+}
+
+### 2. Login com usuário cadastrado
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "joao.silva@example.com",
+  "password": "senha123"
+}
+
+### 3. Login com usuário do seed (Maria Silva - Voluntária)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "maria.silva@example.com",
+  "password": "senha123"
+}
+
+### 4. Login com usuário do seed (Carlos Santos - Mentor)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "carlos.santos@example.com",
+  "password": "senha123"
+}
+
+### 5. Buscar dados do usuário autenticado (Rota Protegida)
+# Substitua {{token}} pelo token recebido no login
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+### 6. Buscar usuário por ID (Rota Protegida)
+GET {{baseUrl}}/user/uuid-do-usuario
+Authorization: Bearer {{token}}
+
+### 7. Buscar meu próprio perfil (Rota Protegida)
+GET {{baseUrl}}/user/profile/me
+Authorization: Bearer {{token}}
+
+### 8. Listar todos os usuários (Rota Pública)
+GET {{baseUrl}}/user
+
+### 9. Teste de erro - Login com senha incorreta
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "joao.silva@example.com",
+  "password": "senhaerrada"
+}
+
+### 10. Teste de erro - Login com email inexistente
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "naoexiste@example.com",
+  "password": "senha123"
+}
+
+### 11. Teste de erro - Acessar rota protegida sem token
+GET {{baseUrl}}/auth/me
+
+### 12. Teste de erro - Acessar rota protegida com token inválido
+GET {{baseUrl}}/auth/me
+Authorization: Bearer token_invalido_aqui
+
+###
+# FLUXO COMPLETO DE TESTE
+###
+
+### PASSO 1: Registrar novo usuário
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Teste Login",
+  "email": "teste.login@example.com",
+  "password": "senha123",
+  "birthdate": "1995-01-01",
+  "profileType": "STUDENT"
+}
+
+### PASSO 2: Fazer login (copie o token da resposta)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "teste.login@example.com",
+  "password": "senha123"
+}
+
+### PASSO 3: Usar o token para acessar dados do usuário
+# Cole o token no lugar de {{token}}
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+###
+# EXEMPLO COM PERFIS DIFERENTES
+###
+
+### Estudante fazendo login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "joao.pedro@example.com",
+  "password": "senha123"
+}
+
+### Mentor fazendo login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "carlos.santos@example.com",
+  "password": "senha123"
+}
+
+### Voluntário fazendo login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "maria.silva@example.com",
+  "password": "senha123"
+}

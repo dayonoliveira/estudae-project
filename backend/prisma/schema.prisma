@@ -1,0 +1,328 @@
+// =====================================================
+// ESTUDAE - PRISMA SCHEMA
+// =====================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =====================================================
+// ENUMS
+// =====================================================
+
+enum UserStatus {
+  ACTIVE
+  REPORTED
+  BLOCKED_BECAUSE_REPORTS
+  DELETED
+}
+
+enum TypeFamiliarity {
+  FATHER
+  MOTHER
+  GRANDFATHER
+  GRANDMOTHER
+  UNCLE
+  AUNT
+  STEPFATHER
+  STEPMOTHER
+}
+
+enum ProfileType {
+  STUDENT
+  MENTOR
+  VOLUNTEER
+}
+
+// enum UrgencyLevel {
+//   LOW
+//   MEDIUM
+//   HIGH
+// }
+
+// enum RequestStatus {
+//   PENDING
+//   MATCHED
+//   COMPLETED
+//   CANCELLED
+// }
+
+// enum MatchStatus {
+//   ACTIVE
+//   COMPLETED
+//   CANCELLED
+// }
+
+// enum RequestType {
+//   MATERIAL
+//   MENTORSHIP
+// }
+
+// enum NotificationType {
+//   MATCH
+//   REMINDER
+//   SYSTEM
+// }
+
+model User {
+  id             BigInt      @id @default(autoincrement())
+  name           String
+  birthdate      DateTime    @db.Date
+  email          String
+  phone          String
+  password       String
+  institute_name String?
+  // bio            String?
+  // profile_photo  Bytes?
+  profile_type   ProfileType
+  status         UserStatus
+  // is_new         Boolean
+  // is_minor       Boolean
+  responsible_id BigInt?
+  // device_ip      String
+  created_at     DateTime
+  updated_at     DateTime
+
+  responsible Responsible? @relation(fields: [responsible_id], references: [id])
+
+  roles                   UserRole[]
+  student                 Student?
+  mentor                  Mentor?
+  volunteer               Volunteer?
+  reports                 Report[]
+  comments_match_mentor   CommentMatchRequestMentor[]
+  comments_match_donation CommentMatchRequestDonation[]
+
+  @@map("user")
+}
+
+model Responsible {
+  id               BigInt          @id @default(autoincrement())
+  name             String
+  familiarity_type TypeFamiliarity
+
+  users User[]
+
+  @@map("responsible")
+}
+
+model UserRole {
+  id        BigInt @id @default(autoincrement())
+  role_name String
+  user_id   BigInt
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@map("user_role")
+}
+
+model Student {
+  id                      BigInt @id @default(autoincrement())
+  education_level         String
+  grade                   Int
+  most_dificult_subject   String
+  most_interested_subject String
+  user_id                 BigInt @unique
+
+  user User @relation(fields: [user_id], references: [id])
+
+  request_mentors   RequestMentor[]
+  request_donations RequestDonation[]
+
+  mentor_matches   MatchRequestMentor[]   @relation("StudentMatchMentor")
+  donation_matches MatchRequestDonation[] @relation("StudentMatchDonation")
+
+  @@map("student")
+}
+
+model Mentor {
+  id             BigInt @id @default(autoincrement())
+  first_subject  String
+  second_subject String
+  third_subject  String
+  total_score    Int
+  career         String
+  user_id        BigInt @unique
+
+  user User @relation(fields: [user_id], references: [id])
+
+  matches MatchRequestMentor[] @relation("MentorMatchMentor")
+
+  @@map("mentor")
+}
+
+model Volunteer {
+  id                       BigInt  @id @default(autoincrement())
+  first_donaing_thing      String
+  second_donaing_thing     String
+  third_donaing_thing      String
+  it_helps_with_recurrence Boolean
+  total_score              Int
+  user_id                  BigInt  @unique
+
+  user User @relation(fields: [user_id], references: [id])
+
+  matches MatchRequestDonation[] @relation("VolunteerMatchDonation")
+
+  @@map("volunteer")
+}
+
+model RequestMentor {
+  id                       BigInt   @id @default(autoincrement())
+  subject_name             String
+  difficulties_description String
+  suggested_date_and_time  DateTime
+  meet_link                String
+  student_user_id          BigInt
+
+  student Student @relation(fields: [student_user_id], references: [id])
+
+  matches MatchRequestMentor[]
+
+  @@map("request_mentor")
+}
+
+model RequestDonation {
+  id                          BigInt   @id @default(autoincrement())
+  material_type               String
+  material_name               String
+  motivation_description      String
+  suggested_date_and_time     DateTime
+  pickup_address_street       String
+  pickup_address_number       String
+  pickup_address_neighborhood String
+  pickup_address_complement   String
+  pickup_address_cep          String
+  student_user_id             BigInt
+
+  student Student @relation(fields: [student_user_id], references: [id])
+
+  matches MatchRequestDonation[]
+
+  @@map("request_donation")
+}
+
+model Feedback {
+  id          BigInt  @id @default(autoincrement())
+  score       Int
+  description String
+  recommended Boolean
+
+  // Feedback usado nos matches com mentor
+  mentor_matches_as_student MatchRequestMentor[] @relation("StudentFeedbackMentor")
+  mentor_matches_as_mentor  MatchRequestMentor[] @relation("MentorFeedbackMentor")
+
+  // Feedback usado nos matches com doação
+  donation_matches_as_student   MatchRequestDonation[] @relation("StudentFeedbackDonation")
+  donation_matches_as_volunteer MatchRequestDonation[] @relation("VolunteerFeedbackDonation")
+
+  @@map("feedback")
+}
+
+model MatchRequestMentor {
+  id                  BigInt @id @default(autoincrement())
+  status              String
+  request_mentor_id   BigInt
+  student_feedback_id BigInt @unique
+  mentor_feedback_id  BigInt @unique
+  student_user_id     BigInt
+  mentor_user_id      BigInt
+
+  request_mentor RequestMentor @relation(fields: [request_mentor_id], references: [id])
+  student        Student       @relation("StudentMatchMentor", fields: [student_user_id], references: [id])
+  mentor         Mentor        @relation("MentorMatchMentor", fields: [mentor_user_id], references: [id])
+
+  student_feedback Feedback @relation("StudentFeedbackMentor", fields: [student_feedback_id], references: [id])
+  mentor_feedback  Feedback @relation("MentorFeedbackMentor", fields: [mentor_feedback_id], references: [id])
+
+  comments CommentMatchRequestMentor[]
+
+  @@map("match_request_mentor")
+}
+
+model MatchRequestDonation {
+  id                    BigInt @id @default(autoincrement())
+  status                String
+  request_donation_id   BigInt
+  student_feedback_id   BigInt @unique
+  volunteer_feedback_id BigInt @unique
+  student_user_id       BigInt
+  volunteer_user_id     BigInt
+
+  request_donation RequestDonation @relation(fields: [request_donation_id], references: [id])
+
+  student   Student   @relation("StudentMatchDonation", fields: [student_user_id], references: [id])
+  volunteer Volunteer @relation("VolunteerMatchDonation", fields: [volunteer_user_id], references: [id])
+
+  student_feedback   Feedback @relation("StudentFeedbackDonation", fields: [student_feedback_id], references: [id])
+  volunteer_feedback Feedback @relation("VolunteerFeedbackDonation", fields: [volunteer_feedback_id], references: [id])
+
+  comments CommentMatchRequestDonation[]
+
+  @@map("match_request_donation")
+}
+
+model CommentMatchRequestMentor {
+  id                      BigInt @id @default(autoincrement())
+  comment_description     String
+  match_request_mentor_id BigInt
+  user_id                 BigInt
+
+  match_request_mentor MatchRequestMentor @relation(fields: [match_request_mentor_id], references: [id])
+  user                 User               @relation(fields: [user_id], references: [id])
+
+  @@map("comment_match_request_mentor")
+}
+
+model CommentMatchRequestDonation {
+  id                        BigInt @id @default(autoincrement())
+  comment_description       String
+  match_request_donation_id BigInt
+  user_id                   BigInt
+
+  match_request_donation MatchRequestDonation @relation(fields: [match_request_donation_id], references: [id])
+  user                   User                 @relation(fields: [user_id], references: [id])
+
+  @@map("comment_match_request_donation")
+}
+
+model Report {
+  id                BigInt  @id @default(autoincrement())
+  report_type       String
+  description       String
+  is_recurrent      Boolean
+  recurrency_number Int
+  was_solved        Boolean
+  match_id          BigInt
+  user_id           BigInt
+
+  user User @relation(fields: [user_id], references: [id])
+
+  @@map("report")
+}
+
+// =====================================================
+// MODEL: Notification
+// =====================================================
+
+// model Notification {
+//   id        String           @id @default(uuid()) @db.Uuid
+//   userId    String           @map("user_id") @db.Uuid
+//   title     String           @db.VarChar(255)
+//   message   String           @db.Text
+//   type      String
+//   relatedId String?          @map("related_id") @db.Uuid
+//   isRead    Boolean          @default(false) @map("is_read")
+//   createdAt DateTime         @default(now()) @map("created_at") @db.Timestamp()
+
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+//   @@index([userId])
+//   @@index([isRead])
+//   @@map("notifications")
+// }
