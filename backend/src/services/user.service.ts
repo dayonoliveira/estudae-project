@@ -42,6 +42,14 @@ export class UserService {
     return await this.userRepository.getUserByName(name);
   }
 
+  async findById(id: bigint) {
+    return await this.userRepository.getUserById(id);
+  }
+
+  async findAll() {
+    return await this.userRepository.findAll();
+  }
+
   async editUserData(userId: bigint, userData: EditUserInputDTO) {
     return await this.userRepository.edit(userId, userData);
   }

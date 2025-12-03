@@ -13,6 +13,9 @@ import {
   Radio,
 } from "@mui/material";
 import { formatPhone } from "../utils/formatPhone";
+import { useNavigate } from "react-router-dom";
+import { api } from "../service/api";
+import { enqueueSnackbar } from "notistack";
 
 const registerSchema = yup.object({
   fullName: yup.string().required("Nome completo obrigatório"),
@@ -43,16 +46,30 @@ type RegisterProps = {
 
 export const Register = ({ setFormType }: RegisterProps) => {
   const {
-    register,
     handleSubmit,
+    register,
+    setValue,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: yupResolver(registerSchema),
   });
+  const navigate = useNavigate();
 
   const onSubmit = (data: RegisterFormData) => {
-    localStorage.setItem("user", JSON.stringify(data));
-    setFormType?.("login");
+
+    api.post("/user", {
+      name: data.fullName,
+      email: data.email,
+      birthdate: '1998-01-01T00:00:00.000Z',
+      password: data.password,
+      phone: data.phone,
+      instituteName: data.institution,
+      profileType: data.role
+    }).then(() => {
+      navigate("/login")
+    }).catch(error => {
+      enqueueSnackbar(error, { preventDuplicate: false, anchorOrigin: { horizontal: 'center', vertical: 'bottom' }, autoHideDuration: 4000 })
+    })
   };
 
   return (
@@ -103,7 +120,10 @@ export const Register = ({ setFormType }: RegisterProps) => {
           fullWidth
           margin="normal"
           {...register("phone")}
-          onChange={(e) => (e.target.value = formatPhone(e.target.value))}
+          onChange={(e) => {
+            const formatted = formatPhone(e.target.value);
+            setValue("phone", formatted, { shouldValidate: true, shouldDirty: true });
+          }}
           error={!!errors.phone}
           helperText={errors.phone?.message}
         />
@@ -120,8 +140,8 @@ export const Register = ({ setFormType }: RegisterProps) => {
         <FormControl fullWidth margin="normal">
           <FormLabel>Você é:</FormLabel>
           <RadioGroup row {...register("role")}>
-            <FormControlLabel value="aluno" control={<Radio />} label="Aluno" />
-            <FormControlLabel value="doador" control={<Radio />} label="Doador" />
+            <FormControlLabel value="STUDENT" control={<Radio />} label="Aluno" />
+            <FormControlLabel value="VOLUNTEER" control={<Radio />} label="Doador" />
           </RadioGroup>
         </FormControl>
 

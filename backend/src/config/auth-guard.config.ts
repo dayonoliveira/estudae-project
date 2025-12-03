@@ -40,8 +40,6 @@ export class AuthGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
-      console.log('caiu aq');
-
       throw new UnauthorizedException();
     }
 

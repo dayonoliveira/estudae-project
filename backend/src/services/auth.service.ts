@@ -12,6 +12,7 @@ import {
 } from '../dtos/input/login.dto';
 import { PrismaService } from './prisma.service';
 import { UserService } from './user.service';
+import { UserOutputDTO } from 'dtos/output/user.output.dto';
 
 @Injectable()
 export class AuthService {
@@ -51,6 +52,7 @@ export class AuthService {
 
     return {
       access_token: accessToken,
+      user: new UserOutputDTO().fromEntityToDto(user),
     };
   }
 

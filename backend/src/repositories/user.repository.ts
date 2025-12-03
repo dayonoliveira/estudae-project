@@ -60,6 +60,20 @@ export class UserRepository {
     return new UserOutputDTO().fromEntityToDto(user);
   }
 
+  async getUserById(id: bigint): Promise<UserOutputDTO> {
+    const user: User | null = await this.prisma.user.findFirst({
+      where: { id: id },
+    });
+
+    return new UserOutputDTO().fromEntityToDto(user);
+  }
+
+  async findAll(): Promise<UserOutputDTO[]> {
+    const users: User[] | null = await this.prisma.user.findMany();
+
+    return users.map((user: User) => new UserOutputDTO().fromEntityToDto(user));
+  }
+
   async edit(
     userId: bigint,
     userData: EditUserInputDTO,

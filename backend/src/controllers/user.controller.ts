@@ -43,6 +43,20 @@ export class UserController {
     return this.userService.findByName(name);
   }
 
+  @Get('/by-id/:id')
+  @HttpCode(HttpStatus.OK)
+  async getById(@Param('id') id: string) {
+    const userIdParsed: bigint = BigInt(id);
+
+    return this.userService.findById(userIdParsed);
+  }
+
+  @Get('/all')
+  @HttpCode(HttpStatus.OK)
+  async getAll() {
+    return this.userService.findAll();
+  }
+
   @Put(':id/edit')
   @HttpCode(HttpStatus.CREATED)
   async editUserData(

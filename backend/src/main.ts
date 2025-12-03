@@ -23,6 +23,12 @@ async function bootstrap() {
     logger: ['error', 'warn'],
   });
 
+  app.enableCors({
+    allowedHeaders: '*',
+    origin: '*',
+    credentials: true,
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

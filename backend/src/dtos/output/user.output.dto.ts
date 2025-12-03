@@ -2,6 +2,7 @@ import { $Enums, User } from '@prisma/client';
 import { dayjsConfig } from 'config/dayjs.config';
 
 export class UserOutputDTO {
+  id: bigint;
   name: string;
   email: string;
   birthdate: string;
@@ -17,6 +18,7 @@ export class UserOutputDTO {
       return new UserOutputDTO();
     }
 
+    this.id = user.id;
     this.name = user.name;
     this.email = user.email;
     this.birthdate = dayjsConfig(user.birthdate).format('YYYY-MM-DD');

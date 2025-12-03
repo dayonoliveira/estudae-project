@@ -5,6 +5,7 @@
 // =====================================================
 
 import { IsEmail, IsNotEmpty } from 'class-validator';
+import { UserOutputDTO } from 'dtos/output/user.output.dto';
 
 /**
  * DTO para requisição de login
@@ -23,7 +24,7 @@ export class LoginDto {
  */
 export class LoginResponseDto {
   access_token: string;
-  // user: UserInfoDto;
+  user: UserOutputDTO;
 }
 
 /**

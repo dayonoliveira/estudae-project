@@ -2,32 +2,38 @@ import { useEffect, useState } from "react";
 import { Box, Typography, Paper } from "@mui/material";
 import { Layout } from "../components/Layout";
 import { UserPopup } from "../components/UsersPopup";
+import { api } from "../service/api";
+import { enqueueSnackbar } from "notistack";
+import type { User } from "./Login";
 
 export const Home = () => {
-  const [user, setUser] = useState<any>(null);
+  const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<any>(null);
 
+  const user: User = JSON.parse(localStorage.getItem('user'))
+
+  function getAllUsers() {
+
+    const token = JSON.parse(localStorage.getItem('token'))
+
+    const config = {
+      headers: {
+        authorization: token
+      }
+    }
+
+    api.get("/user/all", config)
+      .then(({ data }) => {
+        setUsers(prevState => [...data])
+      })
+      .catch(error => {
+          enqueueSnackbar(error, { preventDuplicate: false, anchorOrigin: { horizontal: 'center', vertical: 'bottom' }, autoHideDuration: 4000 })
+        }) 
+  }
+
   useEffect(() => {
-    const saved = localStorage.getItem("user");
-    if (saved) setUser(JSON.parse(saved));
+    getAllUsers()
   }, []);
-
-  if (!user) return null;
-
-  const users = [
-    {
-      name: "Johny Surf",
-      phone: "(85) 98888-7777",
-      institution: user.institution,
-      role: "Aluno",
-    },
-    {
-      name: "Matheus Sales",
-      phone: "(85) 99777-2222",
-      institution: user.institution,
-      role: "Aluno",
-    },
-  ];
 
   return (
     <Layout user={user}>
@@ -41,7 +47,7 @@ export const Home = () => {
             fontSize: { xs: "1.6rem", md: "2rem" },
           }}
         >
-          Bem-vindo(a), {user.name}! 👋
+          Bem-vindo(a), {user?.name}! 👋
         </Typography>
 
         <Typography
@@ -53,7 +59,7 @@ export const Home = () => {
           }}
         >
           Aqui aparecerão outros alunos da instituição{" "}
-          <strong>{user.institution}</strong>.
+          <strong>{user?.instituteName}</strong>.
         </Typography>
 
         <Typography
@@ -86,7 +92,7 @@ export const Home = () => {
             >
               <Typography variant="h6">{u.name}</Typography>
               <Typography sx={{ mt: 1, color: "#555" }}>
-                {u.institution}
+                {u.instituteName}
               </Typography>
             </Paper>
           ))}
