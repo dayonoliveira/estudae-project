@@ -15,12 +15,17 @@
 
 ## 🎯 Sobre o Projeto
 
-**EstudaE** é uma plataforma multiplataforma que conecta estudantes, mentores e voluntários para:
+**ESTUDAE** é uma aplicação com foco social que tem como objetivo aproximar pessoas que não têm condições de adquirir material escolar de pessoas que podem doar ou disponibilizar livros. A proposta é facilitar o acesso a conteúdos de estudo por meio de uma rede colaborativa, promovendo educação mais acessível.
 
-- 📚 Doação de materiais escolares
-- 👨‍🏫 Mentoria acadêmica
-- 🤝 Matching inteligente entre usuários
-- 🔔 Sistema de notificações
+O sistema foi desenvolvido com uma abordagem simples e objetiva, priorizando a criação de contas e o acesso às funcionalidades principais de forma clara e direta.
+
+🎯 Objetivo
+
+Incentivar a doação/compartilhamento de livros e materiais de estudo
+
+Facilitar a conexão entre doadores e estudantes
+
+Contribuir para reduzir a falta de acesso a materiais escolares
 
 Contribuindo para o **ODS 11 - Cidades e Comunidades Sustentáveis**.
 
